@@ -1,8 +1,15 @@
 import pyshark
 import nmap
 
-# Initializing port scanner object
 def port_scan(nm=nmap.PortScanner()):
+    """
+    Perform a port scan on all hosts in the nmap PortScanner object.
+
+    Args:
+        nm (nmap.PortScanner): An optional nmap PortScanner object.
+
+    Prints information about open ports on all scanned hosts.
+    """
     for host in nm.all_hosts():
         print('----------------------------------------------------')
         print('Host : %s (%s)' % (host, nm[host].hostname()))
@@ -11,7 +18,7 @@ def port_scan(nm=nmap.PortScanner()):
             print('----------')
             print('Protocol : %s' % proto)
 
-            lport = nm[host][proto].keys()
+            lport = list(nm[host][proto].keys())
             lport.sort()
             for port in lport:
                 print('port : %s\tstate : %s' % (port, nm[host][proto][port]['state']))
@@ -38,8 +45,16 @@ try:
 except Exception as e:
     print(f'An error occurred: {e}')
 
-# Get Echo Traffic
 def analyze_echo_traffic(captured_packets):
+    """
+    Analyze captured packets to extract Echo-related traffic.
+
+    Args:
+        captured_packets: A list of captured packets.
+
+    Returns:
+        echo_traffic: A list of packets related to the Amazon Echo.
+    """
     echo_traffic = []
     for packet in captured_packets:
         if 'AMAZON_ECHO_IP' in str(packet):
@@ -47,21 +62,25 @@ def analyze_echo_traffic(captured_packets):
 
     return echo_traffic
 
-# Calculate the average TTL of packets
 def calculate_average_ttl(packets):
+    """
+    Calculate the average Time to Live (TTL) value of a list of packets.
+
+    Args:
+        packets: A list of packets with TTL values.
+
+    Returns:
+        average_ttl: The average TTL value.
+    """
     total_ttl = 0
     for packet in packets:
         total_ttl += int(packet.ip.ttl)
     average_ttl = total_ttl / len(packets)
     return average_ttl
 
-# Analyze the captured packets
+# Analyze the captured packets and display or process Echo-related traffic
 #captured_packets = pyshark.FileCapture(output_file)
 #echo_traffic = analyze_echo_traffic(captured_packets)
-
-# Display or process Echo-related traffic
-#for packet in echo_traffic:
-#    print(packet)
 
 # Calculate and print the average TTL
 #average_ttl = calculate_average_ttl(echo_traffic)
