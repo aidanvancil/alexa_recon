@@ -37,3 +37,15 @@ def calculate_average_ttl(packets):
         total_ttl += int(packet.ip.ttl)
     average_ttl = total_ttl / len(packets)
     return average_ttl
+
+# Analyze the captured packets
+captured_packets = pyshark.FileCapture(output_file)
+echo_traffic = analyze_echo_traffic(captured_packets)
+
+# Display or process Echo-related traffic
+for packet in echo_traffic:
+    print(packet)
+
+# Calculate and print the average TTL
+average_ttl = calculate_average_ttl(echo_traffic)
+print(f"Average TTL of Echo-related packets: {average_ttl}")
