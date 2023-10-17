@@ -1,7 +1,7 @@
 import pyshark
 
 # Define the interface for capturing WLAN traffic
-interface = 'wlan0'
+interface = 'ciscodump'
 
 # Define a capture filter (you may need to adjust this based on your specific requirements)
 capture_filter = 'host <AMAZON_ECHO_IP>'
@@ -10,13 +10,12 @@ capture_filter = 'host <AMAZON_ECHO_IP>'
 output_file = 'captured_packets.pcap'
 
 # Start capturing packets
-capture = pyshark.LiveCapture(interface=interface, display_filter=capture_filter)
+capture = pyshark.LiveCapture(interface=interface) #, display_filter=capture_filter)
 
 try:
     # Start capturing and write to file
     capture.sniff(packet_count=100, timeout=10)
     capture.close()
-    capture.export_pcap(output_file)
     print(f'Captured {len(capture)} packets. Saved to {output_file}')
 except Exception as e:
     print(f'An error occurred: {e}')
@@ -39,13 +38,13 @@ def calculate_average_ttl(packets):
     return average_ttl
 
 # Analyze the captured packets
-captured_packets = pyshark.FileCapture(output_file)
-echo_traffic = analyze_echo_traffic(captured_packets)
+#captured_packets = pyshark.FileCapture(output_file)
+#echo_traffic = analyze_echo_traffic(captured_packets)
 
 # Display or process Echo-related traffic
-for packet in echo_traffic:
-    print(packet)
+#for packet in echo_traffic:
+#    print(packet)
 
 # Calculate and print the average TTL
-average_ttl = calculate_average_ttl(echo_traffic)
-print(f"Average TTL of Echo-related packets: {average_ttl}")
+#average_ttl = calculate_average_ttl(echo_traffic)
+#print(f"Average TTL of Echo-related packets: {average_ttl}")
