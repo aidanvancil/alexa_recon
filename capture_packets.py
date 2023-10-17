@@ -20,3 +20,13 @@ try:
     print(f'Captured {len(capture)} packets. Saved to {output_file}')
 except Exception as e:
     print(f'An error occurred: {e}')
+
+
+def analyze_echo_traffic(captured_packets):
+    echo_traffic = []
+    for packet in captured_packets:
+        # Add your analysis logic here to identify Echo-related traffic
+        if 'AMAZON_ECHO_IP' in str(packet):
+            echo_traffic.append(packet)
+
+    return echo_traffic
