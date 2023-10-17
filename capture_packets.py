@@ -21,7 +21,7 @@ try:
 except Exception as e:
     print(f'An error occurred: {e}')
 
-
+# Get Echo Traffic
 def analyze_echo_traffic(captured_packets):
     echo_traffic = []
     for packet in captured_packets:
@@ -29,3 +29,11 @@ def analyze_echo_traffic(captured_packets):
             echo_traffic.append(packet)
 
     return echo_traffic
+
+# Calculate the average TTL of packets
+def calculate_average_ttl(packets):
+    total_ttl = 0
+    for packet in packets:
+        total_ttl += int(packet.ip.ttl)
+    average_ttl = total_ttl / len(packets)
+    return average_ttl
