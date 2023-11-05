@@ -73,6 +73,7 @@ def create_packet_statistics(captured_packets):
         captured_packets: A list of captured packets.
     """
     total_packets = len(captured_packets)
+    print(f"Amazon Echo MAC: {AMAZON_ECHO_MAC}")
     print(f"Total Packets: {total_packets}")
 
     packet_lengths = [len(packet) for packet in captured_packets]
