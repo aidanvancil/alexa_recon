@@ -33,7 +33,10 @@ In conclusion, this project aims to shed light on the network behavior of the Am
 
 ## Screenshots
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![image](https://github.com/aidanvancil/alexa_recon/assets/42700427/3b5bf3df-2d79-42b6-9427-1e79e081b5d8)
+
+![image](https://github.com/aidanvancil/alexa_recon/assets/42700427/32f31610-45e1-40a3-b37b-420d456601a7)
+
 
 ## Run Locally
 
