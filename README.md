@@ -2,7 +2,7 @@
 # Alexa Reconnaissance
 
 ## Abstract 
-text here.
+In this project, our team will demonstrate what the Amazon Echo sends out and receives upon activation of different voice assertions. As a stretch goal we will focus on the same analysis for when the Amazon Echo pairs with Bluetooth devices. Our team presumes the Echo is already encrypted with HTTPS during transit and TLS at rest, so we will utilize Burp Suite, a tool used for packet analysis in combination with Wireshark. Understandably so, capturing WiFi traffic can be difficult, so our team will specifically take Wireshark WLAN capturing in mind. The analysis performed will be on the average latency and the different packets being sent out to the external Amazon server upon varied voice assertions or song requests upon pairing with a Bluetooth device. It will be our focus to see how often the Echo is listening in to hear for an assertion and so on. It is possible this project might encompass some simple Python scripting with ‘pyshark’, ‘python-nmap’, and ‘impacket’, in order to further parse packets for human-readability. If so, the scripting and analysis of this project will be hosted on Github and can be publicly accessible upon the completion of the project with in-depth documentation and measurements.
 
 ## Phase 1 (Computer View)
 text here.
