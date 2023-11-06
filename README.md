@@ -29,25 +29,25 @@ text here.
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  git clone https://https://github.com/aidanvancil/alexa_recon.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd my-project
+  cd alexa_recon
 ```
 
 Install dependencies
 
 ```bash
-  npm install
+  pip install -r requirements.txt
 ```
 
-Start the server
+Run Program
 
 ```bash
-  npm run start
+  python3 capture_packets.py <file>
 ```
 
 
