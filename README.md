@@ -49,12 +49,6 @@ Go to the project directory
   cd alexa_recon
 ```
 
-Install dependencies
-
-```bash
-  pip install -r requirements.txt
-```
-
 Run Program
 
 ```bash
