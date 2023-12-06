@@ -1,6 +1,7 @@
 import pyshark
 import nmap
 import argparse
+import matplotlib.pyplot as plt
 from datetime import datetime
 
 AMAZON_ECHO_MAC = '7c:d5:66:2a:44:3f'
@@ -65,6 +66,45 @@ def calculate_average_ttl(packets):
     average_ttl = total_ttl / ttl_packets
     return average_ttl
 
+def plot_packet_lengths(packet_lengths):
+    """
+    Plot a histogram to visualize the distribution of packet lengths.
+
+    Args:
+        packet_lengths (list): A list containing the lengths of packets.
+
+    Returns:
+        None
+    """
+    plt.hist(packet_lengths, bins=20, color='blue', alpha=0.7)
+    plt.title('Packet Length Distribution')
+    plt.xlabel('Packet Length (bytes)')
+    plt.ylabel('Frequency')
+    try:
+        filename = args.file.split('_')
+        filename = '_'.join(filename[0:3])
+        plt.savefig(f'{filename}_plot.png')
+    except:
+        pass
+    plt.close()
+
+def analyze_traffic(captured_packets, target_mac):
+    """
+    Filter captured packets based on a target MAC address.
+
+    Args:
+        captured_packets (list): A list of captured packets.
+        target_mac (str): The MAC address to filter packets.
+
+    Returns:
+        relevant_traffic (list): A list of packets containing the target MAC address.
+    """
+    relevant_traffic = []
+    for packet in captured_packets:
+        if target_mac in str(packet):
+            relevant_traffic.append(packet)
+    return relevant_traffic
+
 def create_packet_statistics(captured_packets):
     """
     Create and print various packet statistics.
@@ -83,6 +123,7 @@ def create_packet_statistics(captured_packets):
     print(f"Minimum Packet Length: {min_length} bytes")
     print(f"Maximum Packet Length: {max_length} bytes")
     print(f"Average Packet Length: {avg_length} bytes")
+    plot_packet_lengths(packet_lengths)
 
     protocol_distribution = {}
     for packet in captured_packets:
@@ -120,12 +161,12 @@ if __name__ == "__main__":
     # Analyze the captured packets from the specified file
     try:
         captured_packets = pyshark.FileCapture(args.file)
+    except FileNotFoundError:
+        print(f"Error: File {args.file} not found.")
+        exit(1)
     except Exception as e:
         print(f"Error: {e}")
         exit(1)
 
     echo_traffic = analyze_echo_traffic(captured_packets)
     create_packet_statistics(echo_traffic)
-
-
-    
