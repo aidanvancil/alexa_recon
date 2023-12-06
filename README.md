@@ -17,9 +17,6 @@ In this phase, our team will focus on capturing WiFi traffic originating from an
 ### Expected Findings
 We anticipate capturing HTTPS-encrypted traffic between the Amazon Echo device and external Amazon servers. The findings will reveal how often the Echo device communicates with Amazon servers and what type of data is exchanged. This information is crucial for understanding the behavior of the device and its interaction with the cloud.
 
-## Phase 2 (Router View)
-W.I.P.
-
 ## Extra Findings
 - SSDP packets are essentially "hello" messages from the Alexa device to inform other devices on the network that it's available for interaction and to provide information about its capabilities and services.  it helps devices like your computer or mobile phone discover and interact with the Alexa device for voice commands and other interactions.
 
