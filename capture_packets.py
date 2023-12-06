@@ -1,7 +1,7 @@
 import pyshark
 import nmap
 import argparse
-import matplotlib.pyplot as plt
+from utils import *
 
 AMAZON_ECHO_MAC = '7c:d5:66:2a:44:3f'
 
@@ -12,7 +12,8 @@ def port_scan():
     Args:
         nm (nmap.PortScanner): An optional nmap PortScanner object.
 
-    Prints information about open ports on all scanned hosts.
+    Returns:
+        None
     """
     nm=nmap.PortScanner()
     for host in nm.all_hosts():
@@ -44,135 +45,6 @@ def analyze_echo_traffic(captured_packets):
             echo_traffic.append(packet)
     return echo_traffic
 
-def most_common_ports(captured_packets):
-    """
-    Obtains the most common source and destination ports for the Echo captured packets.
-
-    Args:
-        captured_packets: A list of captured packets.
-
-    Returns:
-        None
-    """
-    source_ports = [packet.udp.srcport for packet in captured_packets if 'udp' in packet]
-    dest_ports = [packet.udp.dstport for packet in captured_packets if 'udp' in packet]
-
-    most_common_source_port = max(set(source_ports), key=source_ports.count)
-    most_common_dest_port = max(set(dest_ports), key=dest_ports.count)
-
-    print(f"Most Common Source Port: {most_common_source_port}")
-    print(f"Most Common Destination Port: {most_common_dest_port}")
-
-def ipv4_ipv6_count(captured_packets):
-    """
-    Counts the packets of IPV4 or IPV6 type.
-
-    Args:
-        captured_packets: A list of captured packets.
-
-    Returns:
-        None
-    """
-    ipv4_count = sum(1 for packet in captured_packets if 'ip' in packet and packet.ip.version == '4')
-    ipv6_count = sum(1 for packet in captured_packets if 'ip' in packet and packet.ip.version == '6')
-
-    print(f"IPv4 Packets: {ipv4_count}")
-    print(f"IPv6 Packets: {ipv6_count}")
-
-
-def calculate_average_ttl(packets):
-    """
-    Calculate the average Time to Live (TTL) value of a list of packets.
-
-    Args:
-        packets: A list of packets with TTL values.
-
-    Returns:
-        average_ttl: The average TTL value.
-    """
-    total_ttl = 0
-    ttl_packets = len(packets)
-    for packet in packets:
-        try:
-            total_ttl += int(packet.ip.ttl)
-        except:
-            ttl_packets -= 1
-    average_ttl = total_ttl / ttl_packets
-    return average_ttl
-
-def plot_packet_lengths(packet_lengths):
-    """
-    Plot a histogram to visualize the distribution of packet lengths.
-
-    Args:
-        packet_lengths (list): A list containing the lengths of packets.
-
-    Returns:
-        None
-    """
-    plt.hist(packet_lengths, bins=20, color='blue', alpha=0.7)
-    plt.title('Packet Length Distribution')
-    plt.xlabel('Packet Length (bytes)')
-    plt.ylabel('Frequency')
-    try:
-        filename = args.file.split('_')
-        filename = '_'.join(filename[0:3])
-        plt.savefig(f'{filename}_length_plot.png')
-    except:
-        pass
-    plt.close()
-
-def analyze_traffic(captured_packets, target_mac):
-    """
-    Filter captured packets based on a target MAC address.
-
-    Args:
-        captured_packets (list): A list of captured packets.
-        target_mac (str): The MAC address to filter packets.
-
-    Returns:
-        relevant_traffic (list): A list of packets containing the target MAC address.
-    """
-    relevant_traffic = []
-    for packet in captured_packets:
-        if target_mac in str(packet):
-            relevant_traffic.append(packet)
-    return relevant_traffic
-
-def plot_name_distribution(captured_packets):
-    """
-    Plot a bar chart to visualize the distribution of names.
-
-    Args:
-        captured_packets: A list of captured packets.
-    """
-    name_count = {}
-    for item in captured_packets:
-        try:
-            if hasattr(item, 'mdns') and item.mdns.dns_qry_name:
-                name = item.mdns.dns_qry_name
-                name_count[name] = name_count.get(name, 0) + 1
-        except AttributeError:
-            continue
-
-    most_common_names = sorted(name_count.items(), key=lambda x: x[1], reverse=True)
-    top_names = [name for name, count in most_common_names]
-    counts = [count for name, count in most_common_names]
-
-    plt.bar(top_names, counts, color='blue', alpha=0.7)
-    plt.title('Name Distribution')
-    plt.xlabel('Name')
-    plt.ylabel('Frequency')
-    plt.xticks(rotation=45, ha='right') # We are rotating for better visibility, due to long DNS server names.
-    plt.tight_layout()
-    try:
-        filename = args.file.split('_')
-        filename = '_'.join(filename[0:3])
-        plt.savefig(f'{filename}_name_plot.png')
-    except:
-        pass
-    plt.close()
-
 def create_packet_statistics(captured_packets):
     """
     Create and print various packet statistics.
@@ -185,40 +57,16 @@ def create_packet_statistics(captured_packets):
     """
     total_packets = len(captured_packets)
     print(f"Amazon Echo MAC: {AMAZON_ECHO_MAC}")
-    print(f"Total Packets: {total_packets}")
-
+    print(f"Total Packets: {total_packets}\n")
     packet_lengths = [len(packet) for packet in captured_packets]
-    min_length = min(packet_lengths)
-    max_length = max(packet_lengths)
-    avg_length = sum(packet_lengths) / total_packets
-    print(f"Minimum Packet Length: {min_length} bytes")
-    print(f"Maximum Packet Length: {max_length} bytes")
-    print(f"Average Packet Length: {avg_length} bytes")
-    plot_packet_lengths(packet_lengths)
 
-    protocol_distribution = {}
-    for packet in captured_packets:
-        protocol = packet.transport_layer
-        protocol_distribution[protocol] = protocol_distribution.get(protocol, 0) + 1
-
-    print("Protocol Distribution:")
-    for protocol, count in protocol_distribution.items():
-        print(f"{protocol}: {count} packets")
-
+    packet_length_statistics(packet_lengths, total_packets)
+    plot_packet_lengths(packet_lengths, args)
+    protocol_distribution(captured_packets)
     most_common_ports(captured_packets)
     ipv4_ipv6_count(captured_packets)
-    plot_name_distribution(captured_packets)
-
-
-    time_gaps = [(captured_packets[i].sniff_time - captured_packets[i - 1].sniff_time).total_seconds() for i in range(1, total_packets)]
-    
-    min_time_gap = min(time_gaps)
-    max_time_gap = max(time_gaps)
-    avg_time_gap = sum(time_gaps) / (len(time_gaps) - 1)
-
-    print(f"Minimum Time Gap: {min_time_gap} seconds")
-    print(f"Maximum Time Gap: {max_time_gap} seconds")
-    print(f"Average Time Gap: {avg_time_gap} seconds")
+    plot_name_distribution(captured_packets, args)
+    packet_timegap_statistics(captured_packets, total_packets)
 
     # Calculate and print the average TTL
     average_ttl = calculate_average_ttl(echo_traffic)
