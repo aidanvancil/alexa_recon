@@ -2,7 +2,6 @@ import pyshark
 import nmap
 import argparse
 import matplotlib.pyplot as plt
-from datetime import datetime
 
 AMAZON_ECHO_MAC = '7c:d5:66:2a:44:3f'
 
@@ -43,8 +42,43 @@ def analyze_echo_traffic(captured_packets):
     for packet in captured_packets:
         if AMAZON_ECHO_MAC in str(packet):
             echo_traffic.append(packet)
-
     return echo_traffic
+
+def most_common_ports(captured_packets):
+    """
+    Obtains the most common source and destination ports for the Echo captured packets.
+
+    Args:
+        captured_packets: A list of captured packets.
+
+    Returns:
+        None
+    """
+    source_ports = [packet.udp.srcport for packet in captured_packets if 'udp' in packet]
+    dest_ports = [packet.udp.dstport for packet in captured_packets if 'udp' in packet]
+
+    most_common_source_port = max(set(source_ports), key=source_ports.count)
+    most_common_dest_port = max(set(dest_ports), key=dest_ports.count)
+
+    print(f"Most Common Source Port: {most_common_source_port}")
+    print(f"Most Common Destination Port: {most_common_dest_port}")
+
+def ipv4_ipv6_count(captured_packets):
+    """
+    Counts the packets of IPV4 or IPV6 type.
+
+    Args:
+        captured_packets: A list of captured packets.
+
+    Returns:
+        None
+    """
+    ipv4_count = sum(1 for packet in captured_packets if 'ip' in packet and packet.ip.version == '4')
+    ipv6_count = sum(1 for packet in captured_packets if 'ip' in packet and packet.ip.version == '6')
+
+    print(f"IPv4 Packets: {ipv4_count}")
+    print(f"IPv6 Packets: {ipv6_count}")
+
 
 def calculate_average_ttl(packets):
     """
@@ -83,7 +117,7 @@ def plot_packet_lengths(packet_lengths):
     try:
         filename = args.file.split('_')
         filename = '_'.join(filename[0:3])
-        plt.savefig(f'{filename}_plot.png')
+        plt.savefig(f'{filename}_length_plot.png')
     except:
         pass
     plt.close()
@@ -105,12 +139,49 @@ def analyze_traffic(captured_packets, target_mac):
             relevant_traffic.append(packet)
     return relevant_traffic
 
+def plot_name_distribution(captured_packets):
+    """
+    Plot a bar chart to visualize the distribution of names.
+
+    Args:
+        captured_packets: A list of captured packets.
+    """
+    name_count = {}
+    for item in captured_packets:
+        try:
+            if hasattr(item, 'mdns') and item.mdns.dns_qry_name:
+                name = item.mdns.dns_qry_name
+                name_count[name] = name_count.get(name, 0) + 1
+        except AttributeError:
+            continue
+
+    most_common_names = sorted(name_count.items(), key=lambda x: x[1], reverse=True)
+    top_names = [name for name, count in most_common_names]
+    counts = [count for name, count in most_common_names]
+
+    plt.bar(top_names, counts, color='blue', alpha=0.7)
+    plt.title('Name Distribution')
+    plt.xlabel('Name')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=45, ha='right') # We are rotating for better visibility, due to long DNS server names.
+    plt.tight_layout()
+    try:
+        filename = args.file.split('_')
+        filename = '_'.join(filename[0:3])
+        plt.savefig(f'{filename}_name_plot.png')
+    except:
+        pass
+    plt.close()
+
 def create_packet_statistics(captured_packets):
     """
     Create and print various packet statistics.
 
     Args:
         captured_packets: A list of captured packets.
+
+    Returns:
+        None
     """
     total_packets = len(captured_packets)
     print(f"Amazon Echo MAC: {AMAZON_ECHO_MAC}")
@@ -133,6 +204,11 @@ def create_packet_statistics(captured_packets):
     print("Protocol Distribution:")
     for protocol, count in protocol_distribution.items():
         print(f"{protocol}: {count} packets")
+
+    most_common_ports(captured_packets)
+    ipv4_ipv6_count(captured_packets)
+    plot_name_distribution(captured_packets)
+
 
     time_gaps = [(captured_packets[i].sniff_time - captured_packets[i - 1].sniff_time).total_seconds() for i in range(1, total_packets)]
     
